@@ -13,7 +13,8 @@ from k8s import (
 )
 
 app = FastAPI(title="OpenShift ChatBot")
-
+class ChatRequest(BaseModel):
+    question: str
 
 @app.get("/")
 def home():
