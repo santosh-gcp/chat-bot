@@ -54,3 +54,7 @@ def nodes():
 @app.get("/namespaces")
 def namespaces():
     return get_namespaces()
+
+@app.post("/chat")
+def chat(request: ChatRequest):
+    return chatbot(request.question)
