@@ -1,12 +1,20 @@
 from fastapi import FastAPI
 from k8s import get_pods
 
-app = FastAPI()
+app = FastAPI(title="OpenShift ChatBot")
 
 @app.get("/")
-def home():
-    return {"message": "Welcome to OCP Chatbot"}
+def root():
+    return {
+        "message": "Welcome to OpenShift ChatBot"
+    }
+
+@app.get("/health")
+def health():
+    return {
+        "status": "Healthy"
+    }
 
 @app.get("/pods")
 def pods():
-    return get_pods("santoshvih-dev")
+    return get_pods()
