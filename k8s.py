@@ -1,11 +1,15 @@
 from kubernetes import client, config
 
-config.load_incluster_config()
+def get_pods():
+    config.load_incluster_config()
 
-v1 = client.CoreV1Api()
+    v1 = client.CoreV1Api()
 
-def get_pods(namespace):
-    pods = v1.list_namespaced_pod(namespace=namespace)
+    namespace = open(
+        "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+    ).read().strip()
+
+    pods = v1.list_namespaced_pod(namespace)
 
     result = []
 
