@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
+from chat import chatbot
+from fastapi import FastAPI
 
 from k8s import (
     get_pods,
