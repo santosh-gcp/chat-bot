@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>OCP Cluster Assistant</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .header {
+            background: #20232a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            color: #ccc;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .chat-box {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 90px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+        }
+
+        .ask-button {
+            margin-top: 12px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #0066cc;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .ask-button:hover {
+            background: #0052a3;
+        }
+
+        .quick-title {
+            margin-top: 25px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .quick-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .quick-button {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .quick-button:hover {
+            background: #eee;
+        }
+
+        .answer {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-left: 5px solid #0066cc;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 15px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🟢 OCP Cluster Assistant</h1>
+    <p>Ask questions about your OpenShift cluster</p>
+</div>
+
+<div class="container">
+
+    <div class="chat-box">
+
+        <textarea
+            id="question"
+            placeholder="Example: Are any pods unhealthy?"
+        ></textarea>
+
+        <button class="ask-button" onclick="askQuestion()">
+            Ask
+        </button>
+
+        <div class="quick-title">
+            Quick Questions
+        </div>
+
+        <div class="quick-buttons">
+
+            <button class="quick-button"
+                onclick="setQuestion('Is my cluster healthy?')">
+                🟢 Cluster Health
+            </button>
+
+            <button class="quick-button"
+                onclick="setQuestion('Are any pods unhealthy?')">
+                📦 Pods
+            </button>
+
+            <button class="quick-button"
+                onclick="setQuestion('Show me the nodes')">
+                🖥️ Nodes
+            </button>
+
+            <button class="quick-button"
+                onclick="setQuestion('Are any OpenShift operators degraded?')">
+                ⚙️ Operators
+            </button>
+
+            <button class="quick-button"
+                onclick="setQuestion('Show me warning events')">
+                ⚠️ Warning Events
+            </button>
+
+            <button class="quick-button"
+                onclick="setQuestion('Show me deployments')">
+                🚀 Deployments
+            </button>
+
+            <button class="quick-button"
+                onclick="setQuestion('Show me services')">
+                🌐 Services
+            </button>
+
+        </div>
+
+        <div class="loading" id="loading">
+            ⏳ Checking OpenShift cluster...
+        </div>
+
+        <div class="answer" id="answer">
+            Ask a question to get started.
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function setQuestion(question) {
+    document.getElementById("question").value = question;
+    askQuestion();
+}
+
+async function askQuestion() {
+
+    const question =
+        document.getElementById("question").value.trim();
+
+    if (!question) {
+        alert("Please enter a question.");
+        return;
+    }
+
+    const answer =
+        document.getElementById("answer");
+
+    const loading =
+        document.getElementById("loading");
+
+    loading.style.display = "block";
+
+    answer.innerText = "";
+
+    try {
+
+        const response = await fetch("/chat", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                question: question
+            })
+
+        });
+
+        const data = await response.json();
+
+        if (data.answer) {
+            answer.innerText = data.answer;
+        } else {
+            answer.innerText =
+                JSON.stringify(data, null, 2);
+        }
+
+    } catch (error) {
+
+        answer.innerText =
+            "Unable to connect to chatbot: " + error;
+
+    }
+
+    loading.style.display = "none";
+}
+
+</script>
+
+</body>
+</html>
