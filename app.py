@@ -1,60 +1,31 @@
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
 from chat import chatbot
-from fastapi import FastAPI
 
-from k8s import (
-    get_pods,
-    get_deployments,
-    get_services,
-    get_events,
-    get_nodes,
-    get_namespaces
-)
+app = FastAPI(title="OCP Cluster Assistant")
 
-app = FastAPI(title="OpenShift ChatBot")
+
 class ChatRequest(BaseModel):
     question: str
 
-@app.get("/")
+
+@app.get("/", response_class=HTMLResponse)
 def home():
-    return {"message": "Welcome to OpenShift ChatBot"}
+    with open("templates/index.html", "r") as file:
+        return file.read()
 
-
-@app.get("/health")
-def health():
-    return {"status": "Healthy"}
-
-
-@app.get("/pods")
-def pods():
-    return get_pods()
-
-
-@app.get("/deployments")
-def deployments():
-    return get_deployments()
-
-
-@app.get("/services")
-def services():
-    return get_services()
-
-
-@app.get("/events")
-def events():
-    return get_events()
-
-
-@app.get("/nodes")
-def nodes():
-    return get_nodes()
-
-
-@app.get("/namespaces")
-def namespaces():
-    return get_namespaces()
 
 @app.post("/chat")
 def chat(request: ChatRequest):
     return chatbot(request.question)
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "service": "OCP Cluster Assistant"
+    }
