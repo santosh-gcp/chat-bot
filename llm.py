@@ -1,16 +1,22 @@
-import os
-from openai import OpenAI
+import requests
 
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+OLLAMA_URL = "http://ollama:11434"
+MODEL = "llama3.2:1b"
 
 
 def ask_gpt(question: str):
-
-    response = client.responses.create(
-        model="gpt-5.5",
-        input=question
+    response = requests.post(
+        f"{OLLAMA_URL}/api/generate",
+        json={
+            "model": MODEL,
+            "prompt": question,
+            "stream": False
+        },
+        timeout=120
     )
 
-    return response.output_text
+    response.raise_for_status()
+
+    data = response.json()
+
+    return data["response"]
