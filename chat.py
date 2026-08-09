@@ -25,26 +25,25 @@ TOOLS = {
     "cluster_health": get_cluster_health,
 }
 
-
 def chatbot(question: str):
 
     q = question.lower()
-    
-# Decide which Kubernetes tool to use
-if (
-    "unhealthy" in q
-    or "failed pod" in q
-    or "failed pods" in q
-    or "pod health" in q
-    or "pod status" in q
-):
-    data = get_unhealthy_pods()
 
-elif "pod" in q or "pods" in q:
-    data = get_pods()
+    # Decide which Kubernetes tool to use
+    if (
+        "unhealthy" in q
+        or "failed pod" in q
+        or "failed pods" in q
+        or "pod health" in q
+        or "pod status" in q
+    ):
+        data = get_unhealthy_pods()
 
-elif "node" in q or "nodes" in q:
-    data = get_nodes()
+    elif "pod" in q or "pods" in q:
+        data = get_pods()
+
+    elif "node" in q or "nodes" in q:
+        data = get_nodes()
 
     # Decide which Kubernetes tool to use
     if "unhealthy pod" in q or "failed pod" in q or "pod health" in q:
