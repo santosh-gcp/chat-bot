@@ -361,3 +361,91 @@ def get_cluster_health():
     health["cluster_operators"] = get_cluster_operators()
 
     return health
+
+def get_unhealthy_pods():
+    namespace = get_namespace()
+
+    pods = core_v1.list_namespaced_pod(namespace)
+
+    result = []
+
+    unhealthy_statuses = {
+        "Pending",
+        "Failed",
+        "Unknown",
+    }
+
+    for pod in pods.items:
+
+        # Skip OpenShift build pods
+        if "-build" in pod.metadata.name:
+            continue
+
+        reasons = []
+
+        # Check pod phase
+        if pod.status.phase in unhealthy_statuses:
+            reasons.append(
+                f"Pod phase is {pod.status.phase}"
+            )
+
+        # Check container statuses
+        container_statuses = []
+
+        if pod.status.container_statuses:
+            container_statuses = pod.status.container_statuses
+
+        for container in container_statuses:
+
+            # Container not ready
+            if container.ready is False:
+
+                reasons.append(
+                    f"Container {container.name} is not ready"
+                )
+
+            # Restart count
+            if container.restart_count and container.restart_count > 3:
+
+                reasons.append(
+                    f"Container {container.name} restarted "
+                    f"{container.restart_count} times"
+                )
+
+            # Container state
+            if container.state:
+
+                if container.state.waiting:
+
+                    reason = container.state.waiting.reason
+
+                    if reason:
+                        reasons.append(
+                            f"Container {container.name}: {reason}"
+                        )
+
+                if container.state.terminated:
+
+                    reason = container.state.terminated.reason
+
+                    if reason:
+                        reasons.append(
+                            f"Container {container.name}: {reason}"
+                        )
+
+        # Only return unhealthy pods
+        if reasons:
+
+            result.append({
+                "name": pod.metadata.name,
+                "status": pod.status.phase,
+                "node": pod.spec.node_name,
+                "pod_ip": pod.status.pod_ip,
+                "restarts": sum(
+                    c.restart_count
+                    for c in container_statuses
+                ),
+                "reasons": reasons
+            })
+
+    return result
