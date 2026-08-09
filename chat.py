@@ -29,9 +29,7 @@ TOOLS = {
 def chatbot(question: str):
 
     q = question.lower()
-
-    q = question.lower()
-
+    
 # Decide which Kubernetes tool to use
 if (
     "unhealthy" in q
